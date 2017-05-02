@@ -32,3 +32,5 @@ dhcp-gpxe-cid.patch
 dhcp-improved-xid-correct-byte-order.patch
 dhcp-4.2.4-dhclient-options-changed.patch
 ubuntu-dhcpd-conf.patch
+
+dhclient-support-raw-ip.patch
