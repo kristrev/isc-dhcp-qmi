@@ -1,0 +1,3 @@
+etc/dhcp/debug etc/dhcp/dhclient-exit-hooks.d/debug
+etc/dhcp/debug etc/dhcp/dhclient-enter-hooks.d/debug
+etc/apparmor.d/sbin.dhclient etc/apparmor/init/network-interface-security/sbin.dhclient

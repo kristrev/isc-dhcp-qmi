@@ -1,0 +1,10 @@
+dhclient sbin
+
+debian/dhclient.conf etc/dhcp
+
+debian/debug etc/dhcp
+
+debian/apparmor/sbin.dhclient etc/apparmor.d
+
+debian/initramfs-tools/share/hooks/zz-dhclient usr/share/initramfs-tools/hooks
+debian/initramfs-tools/lib/etc usr/lib/initramfs-tools/

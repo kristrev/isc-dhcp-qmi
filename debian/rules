@@ -1,0 +1,103 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE=1
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+
+DEB_HOST_ARCH_OS=$(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+DEB_HOST_GNU_TYPE=$(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE=$(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+LEASE_PATH=/var/lib/dhcp
+DHCLIENT_SCRIPT=/sbin/dhclient-script
+
+CFLAGS+=-Wall
+CFLAGS+=-I/usr/include/bind-export
+CFLAGS+=$(shell dpkg-buildflags --get CFLAGS)
+
+CFLAGS+=-D_PATH_DHCPD_CONF='\"/etc/dhcp/dhcpd.conf\"'
+CFLAGS+=-D_PATH_DHCPD_DB='\"$(LEASE_PATH)/dhcpd.leases\"'
+CFLAGS+=-D_PATH_DHCPD6_DB='\"$(LEASE_PATH)/dhcpd6.leases\"'
+
+CFLAGS+=-D_PATH_DHCLIENT_SCRIPT='\"$(DHCLIENT_SCRIPT)\"'
+CFLAGS+=-D_PATH_DHCLIENT_CONF='\"/etc/dhcp/dhclient.conf\"'
+CFLAGS+=-D_PATH_DHCLIENT_DB='\"$(LEASE_PATH)/dhclient.leases\"'
+CFLAGS+=-D_PATH_DHCLIENT6_DB='\"$(LEASE_PATH)/dhclient6.leases\"'
+
+CONFFLAGS=--prefix=/usr --enable-log-pid --enable-paranoia
+
+# cross-architecture building
+ifneq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
+CONFFLAGS+=--build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE) --with-randomdev=/dev/random
+endif
+
+# hurd support
+ifeq ($(DEB_HOST_ARCH_OS), hurd)
+export DO_LPF=1
+CONFFLAGS+=--enable-use-sockets
+endif
+
+%:
+	dh $@ --parallel --with autoreconf
+
+override_dh_auto_configure:
+
+override_dh_auto_build:
+	# ldap-enabled build
+	test -f Makefile && $(MAKE) distclean || true
+	./configure --with-ldap --with-ldapcrypto CFLAGS="$(CFLAGS) -DNSUPDATE" LDFLAGS="-lirs-export $(LDFLAGS)" $(CONFFLAGS)
+	$(MAKE)
+	mv server/dhcpd dhcpd
+	# ddns-disabled build
+	test -f Makefile && $(MAKE) distclean || true
+	./configure CFLAGS="$(CFLAGS)" $(CONFFLAGS)
+	$(MAKE)
+	mv client/dhclient dhclient
+	# ldap-disabled build
+	test -f Makefile && $(MAKE) distclean || true
+	./configure CFLAGS="$(CFLAGS) -DNSUPDATE" LDFLAGS="-lirs-export $(LDFLAGS)" $(CONFFLAGS)
+	$(MAKE)
+
+override_dh_install:
+	# rename some upstream files
+	cp RELNOTES debian/tmp/changelog
+	cp server/dhcpd.conf.example debian/tmp/dhcpd.conf
+	cp doc/examples/dhcpd-dhcpv6.conf debian/tmp/dhcpd6.conf
+	# install
+	dh_install
+	# rename scripts
+	cp debian/dhclient-script.$(DEB_HOST_ARCH_OS) \
+	    debian/isc-dhcp-client$(DHCLIENT_SCRIPT)
+	cp debian/dhclient-script.$(DEB_HOST_ARCH_OS).udeb \
+	    debian/isc-dhcp-client-udeb$(DHCLIENT_SCRIPT)
+	cp debian/rfc3442-classless-routes.$(DEB_HOST_ARCH_OS) \
+	    debian/isc-dhcp-client/etc/dhcp/dhclient-exit-hooks.d/rfc3442-classless-routes
+	cp contrib/dhcp-lease-list.pl \
+	    debian/isc-dhcp-server/usr/sbin/dhcp-lease-list
+	# use actual paths rather than undefined variables in man pages
+	sed -e 's|ETCDIR|/etc/dhcp|g' \
+	    -e 's/RUNDIR/\/var\/run/g' \
+	    -e 's/CLIENTBINDIR/\/sbin/g' \
+	    -e 's/DBDIR/\/var\/lib\/dhcp/g' \
+	    -i debian/tmp/usr/share/man/man*/*
+	dh_apparmor -pisc-dhcp-client --profile-name=sbin.dhclient
+	dh_apparmor -pisc-dhcp-server --profile-name=usr.sbin.dhcpd
+	dh_apport -a
+
+override_dh_installinit:
+	dh_installinit -Nisc-dhcp-server
+	dh_systemd_enable -pisc-dhcp-server --name isc-dhcp-server
+	dh_installinit -pisc-dhcp-server --name isc-dhcp-server
+	dh_systemd_start -pisc-dhcp-server --name isc-dhcp-server
+	dh_systemd_enable -pisc-dhcp-server --name isc-dhcp-server6
+	dh_installinit -pisc-dhcp-server --name isc-dhcp-server6
+	dh_systemd_start -pisc-dhcp-server --name isc-dhcp-server6
+	dh_systemd_enable -pisc-dhcp-relay --name isc-dhcp-relay
+	dh_installinit -pisc-dhcp-relay --name isc-dhcp-relay
+	dh_systemd_start -pisc-dhcp-relay --name isc-dhcp-relay
+	dh_systemd_enable -pisc-dhcp-relay --name isc-dhcp-relay6
+	dh_installinit -pisc-dhcp-relay --name isc-dhcp-relay6
+	dh_systemd_start -pisc-dhcp-relay --name isc-dhcp-relay6
+
+override_dh_strip:
+	# this can be removed once stretch is released
+	dh_strip --ddeb-migration='isc-dhcp-dbg (<< 4.3.3-7~)'

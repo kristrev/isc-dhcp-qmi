@@ -1,0 +1,2 @@
+rm_conffile /etc/init/isc-dhcp-relay6.conf 4.3.5-3ubuntu1~
+rm_conffile /etc/init/isc-dhcp-relay.conf 4.3.5-3ubuntu1~

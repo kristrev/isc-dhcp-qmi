@@ -1,0 +1,8 @@
+usr/sbin/dhcpd
+
+usr/bin/omshell
+
+debian/tmp/dhcpd.conf etc/dhcp
+debian/tmp/dhcpd6.conf etc/dhcp
+
+debian/apparmor/usr.sbin.dhcpd etc/apparmor.d

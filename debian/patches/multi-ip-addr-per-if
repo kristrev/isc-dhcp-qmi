@@ -1,0 +1,72 @@
+Author: Daniel Nurmi <nurmi@eucalyptus.com>,
+        Steve Langasek <steve.langasek@ubuntu.com>
+Subject: Resolve issue of interfaces not being able to have
+ more than one IP address assigned.
+Bug-Ubuntu: https://launchpad.net/bugs/717166
+Last-Updated: 2017-01-20
+
+Index: isc-dhcp-4.3.5/common/discover.c
+===================================================================
+--- isc-dhcp-4.3.5.orig/common/discover.c
++++ isc-dhcp-4.3.5/common/discover.c
+@@ -596,6 +596,7 @@
+ 
+ 	/* Cycle through the list of interfaces looking for IP addresses. */
+ 	while (next_iface(&info, &err, &ifaces)) {
++		struct ifaddrs *ifaddr, *ifa;
+ 
+ 		/* See if we've seen an interface that matches this one. */
+ 		for (tmp = interfaces; tmp; tmp = tmp->next) {
+@@ -637,9 +638,20 @@
+ 			(*dhcp_interface_discovery_hook)(tmp);
+ 		}
+ 
+-		if ((info.addr.ss_family == AF_INET) && 
+-		    (local_family == AF_INET)) {
+-			struct sockaddr_in *a = (struct sockaddr_in*)&info.addr;
++		getifaddrs(&ifaddr);
++		for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
++
++		    char *s=NULL;
++
++		    s = strchr(ifa->ifa_name, ':');
++		    if (s != NULL) {
++			*s = '\0';
++		    }
++		    if (strcmp(ifa->ifa_name, info.name))
++			continue;
++		    if ( (ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET) &&
++		         (local_family == AF_INET)) {
++			struct sockaddr_in *a = (struct sockaddr_in *)ifa->ifa_addr;
+ 			struct iaddr addr;
+ 
+ 			/* We don't want the loopback interface. */
+@@ -662,12 +674,12 @@
+ 			if (dhcp_interface_setup_hook) {
+ 				(*dhcp_interface_setup_hook)(tmp, &addr);
+ 			}
+-		}
++		    }
+ #ifdef DHCPv6
+-		else if ((info.addr.ss_family == AF_INET6) && 
+-			 (local_family == AF_INET6)) {
+-			struct sockaddr_in6 *a = 
+-					(struct sockaddr_in6*)&info.addr;
++		    else if ((ifa->ifa_addr && ifa->ifa_addr->sa_family == AF_INET6) &&
++			     (local_family == AF_INET6)) {
++			struct sockaddr_in6 *a =
++			              (struct sockaddr_in6*)ifa->ifa_addr;
+ 			struct iaddr addr;
+ 
+ 			/* We don't want the loopback interface. */
+@@ -690,8 +702,9 @@
+ 			if (dhcp_interface_setup_hook) {
+ 				(*dhcp_interface_setup_hook)(tmp, &addr);
+ 			}
+-		}
++		    }
+ #endif /* DHCPv6 */
++		}
+ 	}
+ 
+ 	if (err) {

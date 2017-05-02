@@ -1,0 +1,18 @@
+From: Stéphane Graber <stgraber@ubuntu.com>
+Subject: Deal with the fact that the loopback interface isn't checksummed by Linux
+
+Index: isc-dhcp/client/dhclient.c
+===================================================================
+--- isc-dhcp.orig/client/dhclient.c	2012-09-11 16:03:45.859279971 -0400
++++ isc-dhcp/client/dhclient.c	2012-09-11 18:31:34.347790135 -0400
+@@ -2024,6 +2024,10 @@
+ 			loop = client -> active;
+ 	}
+ 
++	/* Ubuntu wants dhclient -1 to still try to get a new lease in the
++	   background after a DHCP server failure. */
++	onetry = 0;
++
+ 	/* No leases were available, or what was available didn't work, so
+ 	   tell the shell script that we failed to allocate an address,
+ 	   and try again later. */

@@ -1,0 +1,2 @@
+var/lib/dhcp
+etc/apparmor.d/dhcpd.d

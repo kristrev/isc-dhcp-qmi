@@ -1,0 +1,15 @@
+# Defaults for isc-dhcp-relay6 initscript
+# sourced by /etc/init/isc-dhcp-relay6.conf
+
+#
+# This is a POSIX shell fragment
+#
+
+# What interfaces should the DHCP relay forward requests to?
+UPPER_INTERFACES=""
+
+# On what interfaces should the DHCP relay (dhrelay) serve DHCP requests?
+LOWER_INTERFACES=""
+
+# Additional options that are passed to the DHCP relay daemon?
+OPTIONS=""

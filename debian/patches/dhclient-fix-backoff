@@ -1,0 +1,97 @@
+From: Michel Lespinasse <walken@zoy.org>
+Subject: Fix the delays between consecutive requests (the backoff algorithm).
+
+This algorithm is best explained in the following code comment:
+        /* If we're supposed to increase the interval, do so.  If it's
+           currently zero (i.e., we haven't sent any packets yet), set
+           it to initial_interval; otherwise, add to it a random number
+           between zero and two times itself.  On average, this means
+           that it will double with every transmission. */
+However contrary to what the comment indicates, client->interval has
+been initialised, before the first request is sent, to the initial_interval
+value rather than to 0. Because of that, the delay between the first two
+requests is, on average, double of the initial_interval value, instead of
+being equal to the initial_interval value. I'm proposing to change the
+initialization value to zero, in order to match the programmers expectations
+as documented in that comment, and to have the initial-interval option
+in dhclient.conf work as per the documented behavior.
+
+Additionally, I'm proposing to enforce that the delay between consecutive
+requests is always at least one second - this was already the case when
+using the default values, but could be messed with if setting an
+initial-interval of 0 or a backoff-cutoff of 1. Some people
+(see for example http://syn.theti.ca/ ) have been suggesting to use
+a backoff-cutoff of 1, so such configurations do exist in the wild.
+http://bugs.debian.org/509089
+
+Index: isc-dhcp/client/dhclient.c
+===================================================================
+--- isc-dhcp.orig/client/dhclient.c	2012-06-22 14:44:21.714594688 -0400
++++ isc-dhcp/client/dhclient.c	2012-06-22 14:44:30.866594943 -0400
+@@ -894,7 +894,7 @@
+ 	make_request (client, client -> active);
+ 	client -> destination = iaddr_broadcast;
+ 	client -> first_sending = cur_time;
+-	client -> interval = client -> config -> initial_interval;
++	client -> interval = 0;
+ 
+ 	/* Zap the medium list... */
+ 	client -> medium = NULL;
+@@ -920,7 +920,7 @@
+ 	client -> destination = iaddr_broadcast;
+ 	client -> state = S_SELECTING;
+ 	client -> first_sending = cur_time;
+-	client -> interval = client -> config -> initial_interval;
++	client -> interval = 0;
+ 
+ 	/* Add an immediate timeout to cause the first DHCPDISCOVER packet
+ 	   to go out. */
+@@ -1001,7 +1001,7 @@
+ 	client -> destination = iaddr_broadcast;
+ 	client -> state = S_REQUESTING;
+ 	client -> first_sending = cur_time;
+-	client -> interval = client -> config -> initial_interval;
++	client -> interval = 0;
+ 
+ 	/* Make a DHCPREQUEST packet from the lease we picked. */
+ 	make_request (client, picked);
+@@ -1286,7 +1286,7 @@
+ 		client -> destination = iaddr_broadcast;
+ 
+ 	client -> first_sending = cur_time;
+-	client -> interval = client -> config -> initial_interval;
++	client -> interval = 0;
+ 	client -> state = S_RENEWING;
+ 
+ 	/* Send the first packet immediately. */
+@@ -1888,6 +1888,10 @@
+ 			(client -> first_sending +
+ 			 client -> config -> timeout) - cur_time + 1;
+ 
++	/* Make sure the computed interval is at least one second. */
++	if (!client->interval)
++		client->interval = 1;
++
+ 	/* Record the number of seconds since we started sending. */
+ 	if (interval < 65536)
+ 		client -> packet.secs = htons (interval);
+@@ -2129,6 +2133,10 @@
+ 		client -> interval =
+ 			client -> active -> expiry - cur_time + 1;
+ 
++	/* Make sure the computed interval is at least one second. */
++	if (!client->interval)
++		client->interval = 1;
++
+ 	/* If the lease T2 time has elapsed, or if we're not yet bound,
+ 	   broadcast the DHCPREQUEST rather than unicasting. */
+ 	if (client -> state == S_REQUESTING ||
+@@ -3525,7 +3533,7 @@
+ 		} else
+ 			client -> destination = iaddr_broadcast;
+ 		client -> first_sending = cur_time;
+-		client -> interval = client -> config -> initial_interval;
++		client -> interval = 0;
+ 
+ 		/* Zap the medium list... */
+ 		client -> medium = (struct string_list *)0;

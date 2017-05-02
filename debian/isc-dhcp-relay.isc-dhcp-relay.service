@@ -1,0 +1,16 @@
+[Unit]
+Description=ISC DHCP IPv4 relay
+Documentation=man:dhcrelay(8)
+Wants=network-online.target
+After=network-online.target
+After=time-sync.target
+ConditionPathExists=/etc/default/isc-dhcp-relay
+
+[Service]
+EnvironmentFile=/etc/default/isc-dhcp-relay
+ExecStart=/bin/sh -ec '\
+    for I in $INTERFACES; do IFCMD="$IFCMD -i $I"; done; \
+    exec /usr/sbin/dhcrelay -d -4 $OPTIONS $IFCMD $SERVERS'
+
+[Install]
+WantedBy=multi-user.target

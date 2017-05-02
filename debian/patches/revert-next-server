@@ -1,0 +1,27 @@
+From: Oliver Grawert <ogra@ubuntu.com>
+Subject: Revert the need of the next-server option
+
+So it points to the own IP again for tftp if the option
+is not set (patch by Oliver Grawert; disputed upstream).
+
+Index: isc-dhcp/server/dhcp.c
+===================================================================
+--- isc-dhcp.orig/server/dhcp.c	2012-06-22 14:59:47.015948000 -0400
++++ isc-dhcp/server/dhcp.c	2012-06-22 15:03:59.898627552 -0400
+@@ -1216,6 +1216,7 @@
+ 	log_info ("%s", msgbuf);
+ 
+ 	/* Figure out the address of the boot file server. */
++	raw.siaddr = from;
+ 	if ((oc =
+ 	     lookup_option (&server_universe, options, SV_NEXT_SERVER))) {
+ 		if (evaluate_option_cache (&d1, packet, (struct lease *)0,
+@@ -2638,7 +2639,7 @@
+ 	}
+ 
+ 	/* Figure out the address of the boot file server. */
+-	memset (&state -> siaddr, 0, sizeof state -> siaddr);
++	memcpy (&state -> siaddr, state -> from.iabuf, sizeof state -> siaddr);
+ 	if ((oc =
+ 	     lookup_option (&server_universe,
+ 			    state -> options, SV_NEXT_SERVER))) {

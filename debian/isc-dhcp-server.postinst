@@ -1,0 +1,84 @@
+#!/bin/sh
+#
+# Inspiration stolen from the fetchmail* packages. Thanks Henrique!
+#
+#
+
+set -e
+
+case "$1" in
+	configure)
+		# create system dhcpd user and group
+		adduser --system --quiet --no-create-home --home /var/run --group dhcpd
+		# create ddns keys directory
+		if [ ! -e /etc/dhcp/ddns-keys/ ]; then
+			mkdir -m 750 /etc/dhcp/ddns-keys/
+			chown root:dhcpd /etc/dhcp/ddns-keys/
+		fi
+		;;
+
+	abort-upgrade|abort-remove|abort-deconfigure)
+		exit 0
+		;;
+
+	*)
+		echo "postinst called with unknown argument \`$1'" >&2
+		exit 0
+		;;
+esac
+
+# Handle debconf
+. /usr/share/debconf/confmodule
+
+INITCONFFILE="/etc/default/isc-dhcp-server"
+
+# We generate several files during the postinst, and we don't want
+#	them to be readable only by root.
+umask 022
+
+# Generate configuration file if it does not exist, using default values.
+[ -r "${INITCONFFILE}" ] || {
+	echo Generating ${INITCONFFILE}... >&2
+	cat >${INITCONFFILE} <<'EOFMAGICNUMBER1234'
+# Defaults for isc-dhcp-server (sourced by /etc/init.d/isc-dhcp-server)
+
+# Path to dhcpd's config file (default: /etc/dhcp/dhcpd.conf).
+#DHCPDv4_CONF=/etc/dhcp/dhcpd.conf
+#DHCPDv6_CONF=/etc/dhcp/dhcpd6.conf
+
+# Path to dhcpd's PID file (default: /var/run/dhcpd.pid).
+#DHCPDv4_PID=/var/run/dhcpd.pid
+#DHCPDv6_PID=/var/run/dhcpd6.pid
+
+# Additional options to start dhcpd with.
+#	Don't use options -cf or -pf here; use DHCPD_CONF/ DHCPD_PID instead
+#OPTIONS=""
+
+# On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
+#	Separate multiple interfaces with spaces, e.g. "eth0 eth1".
+INTERFACESv4=""
+INTERFACESv6=""
+EOFMAGICNUMBER1234
+}
+
+# ------------------------- Debconf questions start ---------------------
+
+db_get isc-dhcp-server/interfaces || true
+INTERFACESv4="${RET}"
+
+if [ -n "$INTERFACESv4" ]; then
+    TMPFILE="$(mktemp -q ${INITCONFFILE}.new.XXXXXX)"
+    sed -e "s,^[[:space:]]*INTERFACESv4[[:space:]]*=.*,INTERFACESv4=\"${INTERFACESv4}\"," \
+		<${INITCONFFILE} >${TMPFILE}
+    cp ${TMPFILE} ${INITCONFFILE}
+    rm ${TMPFILE}
+fi
+
+# ------------------------- Debconf questions end ---------------------
+db_stop
+
+test ! -x /sbin/restorecon || restorecon /var/lib/dhcp/dhcpd.leases
+
+#DEBHELPER#
+
+exit 0

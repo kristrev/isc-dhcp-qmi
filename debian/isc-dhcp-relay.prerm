@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+invoke-rc.d isc-dhcp-relay stop
+
+#DEBHELPER#
+
+exit 0

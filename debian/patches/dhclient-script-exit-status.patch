@@ -1,0 +1,15 @@
+description: send DHCPDECLINE message only when dhclient script specifically returns exit status 2 indicating that the client should do so
+author: Matt Zimmerman <mdz@debian.org>
+origin: applied originally in 2004 to the debian dhcp3 package (version 3.0+3.0.1rc13-1)
+
+--- a/client/dhclient.c
++++ b/client/dhclient.c
+@@ -1395,7 +1395,7 @@ void bind_lease (client)
+ 	/* If the BOUND/RENEW code detects another machine using the
+ 	   offered address, it exits nonzero.  We need to send a
+ 	   DHCPDECLINE and toss the lease. */
+-	if (script_go(client)) {
++	if (script_go(client) == 2) {
+ 		make_decline(client, client->new);
+ 		send_decline(client);
+ 		destroy_client_lease(client->new);

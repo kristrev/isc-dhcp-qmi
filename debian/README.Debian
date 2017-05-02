@@ -1,0 +1,64 @@
+ISC DHCP for Debian
+-------------------
+
+This is the Debian-packaged version of the Internet Software Consortium
+(ISC) DHCP package.
+
+The sources of the ISC DHCP package produce the following Debian packages:
+
+isc-dhcp-common: Files used by all of the ISC DHCP packages
+isc-dhcp-server: The DHCP server itself
+isc-dhcp-dbg: Debugging symbols for all packages
+isc-dhcp-dev: API for accessing and modifying the DHCP server and client state
+isc-dhcp-client: The DHCP client itself
+isc-dhcp-client-udeb: A stripped down DHCP client package for debian-installer
+isc-dhcp-relay: The DHCP relay
+
+PLEASE NOTE: Upon upgrading isc-dhcp-client, dhclient is NOT restarted.
+Therefore, after upgrading, the version of dhclient running will still be from
+the previous version of isc-dhcp-client that was installed.
+
+The Debian ISC DHCP package is moving toward collaborative maintenance. If
+you're interested in assisting with the maintenance of the package, see
+http://alioth.debian.org/projects/pkg-dhcp
+
+Andrew Pollock <apollock@debian.org>
+ISC DHCP Package Maintainers <pkg-dhcp-devel@lists.alioth.debian.org>
+
+
+Apparmor Profile
+----------------
+If your system uses apparmor, please note that the shipped enforcing profiles
+for isc-dhcp-server and isc-dhcp-client work with the default installation, and
+changes in your configuration may require changes to the installed apparmor
+profile. Please see https://wiki.ubuntu.com/DebuggingApparmor before filing a
+bug against this software.
+
+
+initramfs-tools hook and supplementary files
+--------------------------------------------
+
+isc-dhcp-client ships a hook for initramfs-tools to install dhclient in the
+initramfs, so that systems may bring up IPv4 and IPv6 networking in early
+userspace, in order to mount remote filesystems, etc.
+
+The included "config" script for dhclient-enter-hooks shipping in isc-dhcp-
+client for the initramfs is based off the existing "debug" script. The
+following variables are made available for scripts in the initramfs:
+
+It writes out /run/net-$iface.conf and /run/net6-$iface.conf in a format that
+is compatible with the old ipconfig format:
+
+ - DEVICE/DEVICE6: the network interface configured.
+ - PROTO/IPV4PROTO/IPV6PROTO: configuration protocol used (usually DHCP)
+ - IPV4ADDR/IPV6ADDR: IP address
+ - IPV4NETMASK/IPV6NETMASK: netmask
+ - IPV4GATEWAY/IPV6GATEWAY: network gateway
+ - IPV4DNS0/IPV6DNS0: domain name servers
+ - ROOTSERVER: next/filesystem server for remote root (IPv4 only)
+ - HOSTNAME: system hostname
+ - DNSDOMAIN: DNS domain 
+ - DOMAINSEARCH/IPV6DOMAINSEARCH: search domains
+ 
+See http://git.kernel.org/cgit/libs/klibc/klibc.git/tree/usr/kinit/ipconfig/README.ipconfig
+

@@ -1,0 +1,135 @@
+# Slovak translation of dhcp3 debconf templates.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the dhcp3 package.
+# Ivan Masár <helix84@centrum.sk>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: dhcp3\n"
+"Report-Msgid-Bugs-To: isc-dhcp@packages.debian.org\n"
+"POT-Creation-Date: 2010-07-07 18:58-0700\n"
+"PO-Revision-Date: 2012-06-17 20:34+0100\n"
+"Last-Translator: Ivan Masár <helix84@centrum.sk>\n"
+"Language-Team: Slovak <debian-l10n-slovak@lists.debian.org>\n"
+"Language: sk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-relay.templates:2001
+msgid "Servers the DHCP relay should forward requests to:"
+msgstr "Servery, ktorým má DHCP relay preposielať požiadavky:"
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-relay.templates:2001
+msgid "Please enter the hostname or IP address of at least one DHCP server to which DHCP and BOOTP requests should be relayed."
+msgstr "Prosím, zadajte názov počítača alebo IP adresu aspoň jedného DHCP servera, ktorému sa majú preposielať požiadavky DHCP a BOOTP."
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-relay.templates:2001
+msgid "You can specify multiple server names or IP addresses (in a space-separated list)."
+msgstr "Môžete uviesť viacero názvov serverov alebo IP adries (v zozname oddelenom medzerami)."
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-relay.templates:3001
+msgid "Interfaces the DHCP relay should listen on:"
+msgstr "Rozhrania, na kotrých má DHCP relay počúvať:"
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-relay.templates:3001
+msgid "Please specify which network interface(s) the DHCP relay should attempt to configure. Multiple interface names should be entered as a space-separated list."
+msgstr "Prosím, uveďte, ktoré sieťové rozhrania by sa mal DHCP relay pokúsiť nakonfigurovať. Viaceré názvy rozhraní sa zadávajú ako zoznam oddelený medzerami."
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-relay.templates:3001
+msgid "Leave this field blank to allow for automatic detection and configuration of network interfaces by the DHCP relay, in which case only broadcast interfaces will be used (if possible)."
+msgstr "Na automatickú detekciu sieťových rozhraní pomocou DHCP relay nechajte toto pole nevyplnené. V takom prípade sa použijú iba broadcast rozhrania (ak to bude možné)."
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-relay.templates:4001
+msgid "Additional options for the DHCP relay daemon:"
+msgstr "Dodatočné voľby démona DHCP relay:"
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-relay.templates:4001
+msgid "Please specify any additional options for the DHCP relay daemon."
+msgstr "Prosím, zadajte akékoľvek ďalšie voľby pre DHCP relay démona."
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-relay.templates:4001
+msgid "For example: '-m replace' or '-a -D'."
+msgstr "Napríklad: „-m replace“ alebo „-a -D“."
+
+#. Type: note
+#. Description
+#: ../isc-dhcp-server.templates:2001
+msgid "Manual configuration required after installation"
+msgstr "Po inštalácii sa vyžaduje manuálna konfigurácia"
+
+#. Type: note
+#. Description
+#: ../isc-dhcp-server.templates:2001
+#| msgid ""
+#| "After the DHCP server is installed, you will need to manually configure "
+#| "it by editing the file /etc/isc-dhcp/dhcpd.conf. Please note that the "
+#| "dhcpd.conf supplied is just a sample, and must be adapted to the network "
+#| "environment."
+msgid "After the DHCP server is installed, you will need to manually configure it by editing the file /etc/dhcp/dhcpd.conf. Please note that the dhcpd.conf supplied is just a sample, and must be adapted to the network environment."
+msgstr "Po inštalácii DHCP servera ho budete musieť ručne nakonfigurovať editáciou súboru /etc/dhcp/dhcpd.conf. Prosím, všimnite si, že dhcpd.conf sa dodáva iba ako vzor a je potrebné ho prispôsobiť vášmu sieťovému prostrediu."
+
+#. Type: note
+#. Description
+#: ../isc-dhcp-server.templates:2001
+msgid "Please configure the DHCP server as soon as the installation finishes."
+msgstr "Prosím, nakonfigurujte DHCP server hneď po skončení inštalácie."
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-server.templates:3001
+msgid "Network interfaces on which the DHCP server should listen:"
+msgstr "Sieťové rozhrania, na ktorých má DHCP server počúvať:"
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-server.templates:3001
+msgid "Please specify on which network interface(s) the DHCP server should listen for DHCP requests. Multiple interface names should be entered as a space-separated list."
+msgstr "Prosím, uveďte na ktorých sieťových rozhraniach by mal DHCP server počúvať požiadavky DHCP. Viaceré názvy rozhraní sa zadávajú ako zoznam oddelený medzerami."
+
+#. Type: string
+#. Description
+#: ../isc-dhcp-server.templates:3001
+msgid "The interfaces will be automatically detected if this field is left blank."
+msgstr "Ak pole necháte nevyplnené, rozhrania budú detegované automaticky."
+
+#~ msgid "Non-authoritative version of DHCP server"
+#~ msgstr "Neautoritatívna verzia DHCP servera"
+
+#~ msgid "The version 3 DHCP server is non-authoritative by default."
+#~ msgstr "Verzia 3 DHCP servera je štandardne neautoritatívna."
+
+#~ msgid ""
+#~ "This means that if a client requests an address that the server knows "
+#~ "nothing about and the address is incorrect for that network segment, the "
+#~ "server will _not_ send a DHCPNAK (which tells the client it should stop "
+#~ "using the address). If you want to change this behavior, you must "
+#~ "explicitly state in dhcpd.conf what network segments your server is "
+#~ "authoritative for using the 'authoritative' statement."
+#~ msgstr ""
+#~ "To znamená, že ak si klient vyžiada adresu, o ktorej server nič nevie a "
+#~ "adresa je pre daný sieťový segment nesprávna, server _nepošle_ DHCPNAK "
+#~ "(ktorý oznamuje klientovi, aby prestal túto adresu používať). Ak chcete "
+#~ "toto správanie zmeniť, musíte v dhcpd.conf explicitne uviesť, pre ktoré "
+#~ "segmenty siete je váš server autoritatívny pomocou výrazu 'authoritative'."
+
+#~ msgid "Change in default behaviour of the next-server directive"
+#~ msgstr "Zmeniť štandardné správanie direktívy next-server"

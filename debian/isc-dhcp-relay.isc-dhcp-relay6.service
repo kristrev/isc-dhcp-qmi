@@ -1,0 +1,21 @@
+[Unit]
+Description=ISC DHCP IPv6 relay
+Documentation=man:dhcrelay(8)
+Wants=network-online.target
+After=network-online.target
+After=time-sync.target
+ConditionPathExists=/etc/default/isc-dhcp-relay6
+
+[Service]
+EnvironmentFile=/etc/default/isc-dhcp-relay6
+ExecStart=/bin/sh -ec '\
+    if [ -z "$LOWER_INTERFACES" ] || [ -z "$UPPER_INTERFACES" ]; then \
+	echo "No interface defined in /etc/default/isc-dhcp-relay6! - Aborting..."; \
+	exit 0; \
+    fi; \
+    for I in $LOWER_INTERFACES; do IFCMD="$IFCMD -l $I"; done; \
+    for I in $UPPER_INTERFACES; do IFCMD="$IFCMD -u $I"; done; \
+    exec /usr/sbin/dhcrelay -d -6 $OPTIONS $IFCMD'
+
+[Install]
+WantedBy=multi-user.target

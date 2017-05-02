@@ -1,0 +1,22 @@
+Index: isc-dhcp-4.3.5-3ubuntu1/server/dhcpd.conf.example
+===================================================================
+--- isc-dhcp-4.3.5-3ubuntu1.orig/server/dhcpd.conf.example
++++ isc-dhcp-4.3.5-3ubuntu1/server/dhcpd.conf.example
+@@ -2,6 +2,9 @@
+ #
+ # Sample configuration file for ISC dhcpd
+ #
++# Attention: If /etc/ltsp/dhcpd.conf exists, that will be used as
++# configuration file instead of this file.
++#
+ 
+ # option definitions common to all supported networks...
+ option domain-name "example.org";
+@@ -51,6 +54,7 @@
+ #  range 10.5.5.26 10.5.5.30;
+ #  option domain-name-servers ns1.internal.example.org;
+ #  option domain-name "internal.example.org";
++#  option subnet-mask 255.255.255.224;
+ #  option routers 10.5.5.1;
+ #  option broadcast-address 10.5.5.31;
+ #  default-lease-time 600;

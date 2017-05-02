@@ -1,0 +1,78 @@
+From: Steve Langasek <steve.langasek@ubuntu.com>
+Subject: Increase default timeout to ensure we don't hit it
+Bug-Ubuntu: https://launchpad.net/bugs/838968
+
+In some cases, the 60 second client timeout has been shown to be too
+low, resulting in ifupdown declaring an interface as 'up' when in fact
+the dhclient has simply backgrounded to continue trying.  This is
+addressed in ifupdown by calling dhclient3 with -1 (exit non-zero
+after the timeout), but we don't ever want to *reach* that timeout:
+having an interface fail to come up and never be retried is only
+slightly better than having ifup say the interface is up before it is.
+Now that ifup's dhclient handling is both reliable and highly
+parallelized, we can afford to wait longer to be sure we don't hit
+the timeout when DHCP is really working, so do this by default.
+
+---
+ client/clparse.c                |    2 +-
+ client/dhclient.conf.5          |    4 ++--
+ doc/ja_JP.eucJP/dhclient.conf.5 |    4 ++--
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+Index: b/client/clparse.c
+===================================================================
+--- a/client/clparse.c
++++ b/client/clparse.c
+@@ -124,7 +124,7 @@ isc_result_t read_client_conf ()
+ 	memset (&top_level_config, 0, sizeof top_level_config);
+ 
+ 	/* Set some defaults... */
+-	top_level_config.timeout = 60;
++	top_level_config.timeout = 300;
+ 	top_level_config.select_interval = 0;
+ 	top_level_config.reboot_timeout = 10;
+ 	top_level_config.retry_interval = 300;
+Index: b/client/dhclient.conf.5
+===================================================================
+--- a/client/dhclient.conf.5
++++ b/client/dhclient.conf.5
+@@ -71,7 +71,7 @@ The
+ statement determines the amount of time that must pass between the
+ time that the client begins to try to determine its address and the
+ time that it decides that it's not going to be able to contact a
+-server.  By default, this timeout is sixty seconds.  After the
++server.  By default, this timeout is 300 seconds.  After the
+ timeout has passed, if there are any static leases defined in the
+ configuration file, or any leases remaining in the lease database that
+ have not yet expired, the client will loop through these leases
+@@ -695,7 +695,7 @@ laptop does roam to multiple networks.
+ 
+ .nf
+ 
+-timeout 60;
++timeout 300;
+ retry 60;
+ reboot 10;
+ select-timeout 5;
+Index: b/doc/ja_JP.eucJP/dhclient.conf.5
+===================================================================
+--- a/doc/ja_JP.eucJP/dhclient.conf.5
++++ b/doc/ja_JP.eucJP/dhclient.conf.5
+@@ -77,7 +77,7 @@ dhclient.conf ¥Õ¥¡¥¤¥ë¤Ç¡¢¥¯¥é¥¤¥¢¥ó¥È¤Î
+ Ê¸¤Ï¡¢¥¯¥é¥¤¥¢¥ó¥È¤¬¥¢¥É¥ì¥¹¤ò·è¤á¤ë»î¤ß¤ò³«»Ï¤·¤Æ¤«¤é¡¢
+ ¥µ¡¼¥Ð¤Ë¥¢¥¯¥»¥¹¤¹¤ë¤³¤È¤¬
+ ¤Ç¤­¤Ê¤¤¤ÈÈ½ÃÇ¤¹¤ë¤Þ¤Ç¤Ë·Ð²á¤¹¤Ù¤­»þ´Ö¤ò·è¤á¤Þ¤¹¡£
+-¥Ç¥Õ¥©¥ë¥È¤Ç¤Ï¤³¤Î¥¿¥¤¥à¥¢¥¦¥ÈÃÍ¤Ï 60 ÉÃ¤Ç¤¹¡£
++¥Ç¥Õ¥©¥ë¥È¤Ç¤Ï¤³¤Î¥¿¥¤¥à¥¢¥¦¥ÈÃÍ¤Ï 300 ÉÃ¤Ç¤¹¡£
+ ¤³¤Î¥¿¥¤¥à¥¢¥¦¥ÈÃÍ¤¬²á¤®¤¿¸å¤Ï¡¢
+ ¤â¤·ÀÅÅª¤Ê¥ê¡¼¥¹¤¬ÀßÄê¥Õ¥¡¥¤¥ë¤ËÄêµÁ¤µ¤ì¤Æ¤¤¤ë¤«¡¢
+ ¥ê¡¼¥¹¥Ç¡¼¥¿¥Ù¡¼¥¹¤Ë¤Þ¤À´ü¸ÂÀÚ¤ì¤Ë¤Ê¤Ã¤Æ¤¤¤Ê¤¤¥ê¡¼¥¹¤¬»Ä¤Ã¤Æ¤¤¤ì¤Ð¡¢
+@@ -583,7 +583,7 @@ dhcp ¥¯¥é¥¤¥¢¥ó¥È¤Ï¤½¤Î¥¢¥É¥ì¥¹¤ò¥ê¡¼¥¹¥
+ 
+ .nf
+ 
+-timeout 60;
++timeout 300;
+ retry 60;
+ reboot 10;
+ select-timeout 5;
