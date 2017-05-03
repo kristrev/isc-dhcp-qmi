@@ -66,11 +66,11 @@ override_dh_install:
 	dh_install
 	# rename scripts
 	cp debian/dhclient-script.$(DEB_HOST_ARCH_OS) \
-	    debian/isc-dhcp-client$(DHCLIENT_SCRIPT)
+	    debian/isc-dhcp-client-cwy$(DHCLIENT_SCRIPT)
 	cp debian/dhclient-script.$(DEB_HOST_ARCH_OS).udeb \
 	    debian/isc-dhcp-client-udeb$(DHCLIENT_SCRIPT)
 	cp debian/rfc3442-classless-routes.$(DEB_HOST_ARCH_OS) \
-	    debian/isc-dhcp-client/etc/dhcp/dhclient-exit-hooks.d/rfc3442-classless-routes
+	    debian/isc-dhcp-client-cwy/etc/dhcp/dhclient-exit-hooks.d/rfc3442-classless-routes
 	cp contrib/dhcp-lease-list.pl \
 	    debian/isc-dhcp-server/usr/sbin/dhcp-lease-list
 	# use actual paths rather than undefined variables in man pages

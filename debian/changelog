@@ -1,3 +1,9 @@
+isc-dhcp (4.3.5-3cwy1) zesty; urgency=low
+  * Ported raw IP patch from Bjørn Mork.
+  * Renamed package + added conflict.
+
+ -- Kristian Evensen <kristian.evensen@gmail.com>  Wed, 3 May 2017 09:11:21 +0200
+
 isc-dhcp (4.3.5-3ubuntu1) zesty; urgency=low
 
   * Merge from Debian unstable.  Remaining changes:

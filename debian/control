@@ -99,7 +99,7 @@ Description: API for accessing and modifying the DHCP server and client state
  Programming Interface), which is an API for accessing and modifying the DHCP
  server and client state.
 
-Package: isc-dhcp-client
+Package: isc-dhcp-client-cwy
 Architecture: any
 Depends:
  ${misc:Depends},
@@ -114,6 +114,8 @@ Suggests:
  isc-dhcp-client-ddns,
 Provides:
  dhcp-client,
+Conflicts:
+ isc-dhcp-client,
 Description: DHCP client for automatically obtaining an IP address
  This is the Internet Software Consortium's DHCP client.
  .
